@@ -36,7 +36,7 @@ export {
 } from './fallback';
 
 // Legacy exports for backward compatibility
-export const SUPPORTED_LOCALES = ['en', 'ja', 'ko', 'es', 'fr', 'de', 'zh', 'zh-TW', 'pt', 'ar'] as const;
+export const SUPPORTED_LOCALES = ['en', 'ja', 'ko', 'es', 'fr', 'de', 'zh', 'zh-TW', 'pt', 'ar', 'it'] as const;
 export const DEFAULT_LOCALE = 'en';
 export const LOCALE_CONFIG = {
   en: { name: 'English', nativeName: 'English', direction: 'ltr' as const },
@@ -49,4 +49,5 @@ export const LOCALE_CONFIG = {
   'zh-TW': { name: 'Chinese (Traditional)', nativeName: '繁體中文', direction: 'ltr' as const },
   pt: { name: 'Portuguese', nativeName: 'Português', direction: 'ltr' as const },
   ar: { name: 'Arabic', nativeName: 'العربية', direction: 'rtl' as const },
+  it: { name: 'Italian', nativeName: 'Italiano', direction: 'ltr' as const },
 };

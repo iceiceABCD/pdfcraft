@@ -17,7 +17,7 @@ function getKeys(obj, prefix = '') {
 const en = JSON.parse(fs.readFileSync('messages/en.json', 'utf8'));
 const enKeys = getKeys(en.faqPage);
 
-const locales = ['zh', 'ar', 'de', 'es', 'fr', 'ja', 'ko', 'pt'];
+const locales = ['zh', 'ar', 'de', 'es', 'fr', 'ja', 'ko', 'pt', 'it'];
 
 locales.forEach(loc => {
     const content = JSON.parse(fs.readFileSync(`messages/${loc}.json`, 'utf8'));

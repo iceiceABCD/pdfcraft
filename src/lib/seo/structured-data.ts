@@ -241,6 +241,7 @@ export function generateWebPageSchema(
     'zh-TW': 'zh-TW',
     pt: 'pt-BR',
     ar: 'ar-AR',
+    it: 'it-IT',
   };
 
   return {
