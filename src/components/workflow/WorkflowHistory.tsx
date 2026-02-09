@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { loadExecutionHistory, deleteExecutionRecord, clearExecutionHistory, getExecutionStatistics } from '@/lib/workflow/history';
 import type { WorkflowExecutionRecord } from '@/types/workflow-history';
+import { logger } from '@/lib/utils/logger';
 
 interface WorkflowHistoryProps {
     onLoadFromHistory?: (record: WorkflowExecutionRecord) => void;
@@ -279,7 +280,7 @@ export function WorkflowHistory({ onLoadFromHistory }: WorkflowHistoryProps) {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    console.log('Workflow Details:', {
+                                                    logger.log('Workflow Details:', {
                                                         nodes: record.nodes || [],
                                                         edges: record.edges || [],
                                                         record,

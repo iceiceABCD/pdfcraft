@@ -2536,5 +2536,49 @@ export const toolContentIt: Record<string, ToolContent> = {
       { question: 'Funziona su dispositivi mobili?', answer: 'Sì, il Lettore PDF funziona su tutti i dispositivi con browser moderno.' },
     ],
   },
+
+  'digital-sign-pdf': {
+    title: 'Firma Digitale',
+    metaDescription: 'Aggiungi firme digitali X.509 ai documenti PDF. Firma PDF con certificati PFX, P12 o PEM per validità legale.',
+    keywords: ['firma digitale pdf', 'certificato x509', 'firma pfx', 'firma p12', 'firma pem', 'firma elettronica'],
+    description: '<p>Lo strumento Firma Digitale ti permette di aggiungere firme digitali X.509 crittografiche ai documenti PDF.</p>',
+    howToUse: [
+      { step: 1, title: 'Carica PDF', description: 'Carica il documento PDF che vuoi firmare digitalmente.' },
+      { step: 2, title: 'Carica Certificato', description: 'Carica il tuo file certificato X.509 (.pfx, .p12 o .pem) e inserisci la password.' },
+      { step: 3, title: 'Firma e Scarica', description: 'Clicca su Firma PDF per applicare la firma digitale e scarica il documento firmato.' },
+    ],
+    useCases: [
+      { title: 'Documenti Legali', description: 'Firma contratti e documenti legali con firme digitali legalmente vincolanti.', icon: 'scale' },
+      { title: 'Approvazioni Aziendali', description: 'Firma digitalmente fatture e documenti di approvazione per tracce di audit.', icon: 'briefcase' },
+      { title: 'Integrità del Documento', description: 'Assicurati che i documenti non siano stati alterati dopo la firma.', icon: 'shield-check' },
+    ],
+    faq: [
+      { question: 'Quali formati di certificato sono supportati?', answer: 'Sono supportati i formati di certificato PFX (.pfx), PKCS#12 (.p12) e PEM (.pem).' },
+      { question: 'La firma è legalmente valida?', answer: 'Sì, le firme digitali X.509 con un certificato valido sono legalmente riconosciute nella maggior parte delle giurisdizioni.' },
+      { question: 'Posso aggiungere una firma visibile?', answer: 'Sì, puoi aggiungere una firma visibile con testo, immagine, posizione e stile personalizzati.' },
+    ],
+  },
+
+  'validate-signature': {
+    title: 'Valida Firma',
+    metaDescription: 'Verifica le firme digitali nei documenti PDF. Controlla la validità del certificato, le informazioni del firmatario e l\'integrità del documento.',
+    keywords: ['valida firma pdf', 'verifica firma digitale', 'controlla certificato pdf', 'verifica firma'],
+    description: '<p>Lo strumento Valida Firma ti permette di verificare le firme digitali nei documenti PDF.</p>',
+    howToUse: [
+      { step: 1, title: 'Carica PDF Firmato', description: 'Carica un documento PDF che contiene firme digitali.' },
+      { step: 2, title: 'Visualizza Risultati', description: 'Vedi tutte le firme trovate nel documento con il loro stato di validità.' },
+      { step: 3, title: 'Esporta Report', description: 'Opzionalmente scarica un report JSON dei risultati di validazione.' },
+    ],
+    useCases: [
+      { title: 'Verifica Documenti', description: 'Verifica che i documenti firmati siano autentici e non siano stati alterati.', icon: 'shield-check' },
+      { title: 'Audit di Conformità', description: 'Controlla la validità delle firme per scopi di conformità e audit.', icon: 'clipboard-check' },
+      { title: 'Revisione Certificati', description: 'Visualizza i dettagli del certificato e le date di scadenza dei documenti firmati.', icon: 'award' },
+    ],
+    faq: [
+      { question: 'Cosa significa "valido"?', answer: 'Una firma valida significa che il documento non è stato modificato dalla firma e la catena di certificati è intatta.' },
+      { question: 'Posso validare più PDF?', answer: 'Sì, puoi caricare più PDF e validare tutte le firme in batch.' },
+      { question: 'Perché una firma potrebbe essere invalida?', answer: 'Le firme possono essere invalide se il documento è stato modificato, il certificato è scaduto o il certificato non è attendibile.' },
+    ],
+  },
 };
 

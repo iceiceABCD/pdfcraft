@@ -2049,4 +2049,48 @@ export const toolContentFr: Record<string, ToolContent> = {
       { question: 'Puis-je reconvertir depuis PDF/A ?', answer: 'Les fichiers PDF/A sont des PDF standard et peuvent être ouverts normalement. Les fonctionnalités d\'archivage ajoutent des restrictions, pas des limitations.' },
     ],
   },
+
+  'digital-sign-pdf': {
+    title: 'Signature Numérique',
+    metaDescription: 'Ajoutez des signatures numériques X.509 aux documents PDF. Signez des PDF avec des certificats PFX, P12 ou PEM pour une validité légale.',
+    keywords: ['signature numérique pdf', 'certificat x509', 'signature pfx', 'signature p12', 'signature pem', 'signature électronique'],
+    description: '<p>L\'outil de Signature Numérique vous permet d\'ajouter des signatures numériques X.509 cryptographiques aux documents PDF.</p>',
+    howToUse: [
+      { step: 1, title: 'Télécharger le PDF', description: 'Téléchargez le document PDF que vous souhaitez signer numériquement.' },
+      { step: 2, title: 'Charger le Certificat', description: 'Téléchargez votre fichier de certificat X.509 (.pfx, .p12 ou .pem) et entrez le mot de passe.' },
+      { step: 3, title: 'Signer et Télécharger', description: 'Cliquez sur Signer le PDF pour appliquer la signature numérique et téléchargez le document signé.' },
+    ],
+    useCases: [
+      { title: 'Documents Légaux', description: 'Signez des contrats et documents légaux avec des signatures numériques juridiquement contraignantes.', icon: 'scale' },
+      { title: 'Approbations Commerciales', description: 'Signez numériquement des factures et documents d\'approbation pour les pistes d\'audit.', icon: 'briefcase' },
+      { title: 'Intégrité du Document', description: 'Assurez-vous que les documents n\'ont pas été altérés après la signature.', icon: 'shield-check' },
+    ],
+    faq: [
+      { question: 'Quels formats de certificat sont pris en charge ?', answer: 'Les formats de certificat PFX (.pfx), PKCS#12 (.p12) et PEM (.pem) sont pris en charge.' },
+      { question: 'La signature est-elle légalement valide ?', answer: 'Oui, les signatures numériques X.509 avec un certificat valide sont légalement reconnues dans la plupart des juridictions.' },
+      { question: 'Puis-je ajouter une signature visible ?', answer: 'Oui, vous pouvez ajouter une signature visible avec du texte, une image, une position et un style personnalisés.' },
+    ],
+  },
+
+  'validate-signature': {
+    title: 'Valider la Signature',
+    metaDescription: 'Vérifiez les signatures numériques dans les documents PDF. Vérifiez la validité du certificat, les informations du signataire et l\'intégrité du document.',
+    keywords: ['valider signature pdf', 'vérifier signature numérique', 'vérifier certificat pdf', 'vérification de signature'],
+    description: '<p>L\'outil Valider la Signature vous permet de vérifier les signatures numériques dans les documents PDF.</p>',
+    howToUse: [
+      { step: 1, title: 'Télécharger le PDF Signé', description: 'Téléchargez un document PDF contenant des signatures numériques.' },
+      { step: 2, title: 'Voir les Résultats', description: 'Voyez toutes les signatures trouvées dans le document avec leur statut de validité.' },
+      { step: 3, title: 'Exporter le Rapport', description: 'Téléchargez optionnellement un rapport JSON des résultats de validation.' },
+    ],
+    useCases: [
+      { title: 'Vérification de Documents', description: 'Vérifiez que les documents signés sont authentiques et n\'ont pas été altérés.', icon: 'shield-check' },
+      { title: 'Audit de Conformité', description: 'Vérifiez la validité des signatures à des fins de conformité et d\'audit.', icon: 'clipboard-check' },
+      { title: 'Examen des Certificats', description: 'Consultez les détails du certificat et les dates d\'expiration des documents signés.', icon: 'award' },
+    ],
+    faq: [
+      { question: 'Que signifie "valide" ?', answer: 'Une signature valide signifie que le document n\'a pas été modifié depuis la signature et que la chaîne de certificats est intacte.' },
+      { question: 'Puis-je valider plusieurs PDF ?', answer: 'Oui, vous pouvez télécharger plusieurs PDF et valider toutes les signatures en lot.' },
+      { question: 'Pourquoi une signature pourrait-elle être invalide ?', answer: 'Les signatures peuvent être invalides si le document a été modifié, le certificat a expiré ou le certificat n\'est pas de confiance.' },
+    ],
+  },
 };

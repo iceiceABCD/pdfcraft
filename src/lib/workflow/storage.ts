@@ -4,6 +4,7 @@
  */
 
 import { SavedWorkflow, WorkflowNode, WorkflowEdge } from '@/types/workflow';
+import { logger } from '@/lib/utils/logger';
 
 const STORAGE_KEY = 'pdfcraft_workflows';
 const MAX_WORKFLOWS = 50;
@@ -24,7 +25,7 @@ export function getSavedWorkflows(): SavedWorkflow[] {
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
         );
     } catch (error) {
-        console.error('Failed to load workflows:', error);
+        logger.error('Failed to load workflows:', error);
         return [];
     }
 }
@@ -103,7 +104,7 @@ export function deleteWorkflow(id: string): boolean {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
         return true;
     } catch (error) {
-        console.error('Failed to delete workflow:', error);
+        logger.error('Failed to delete workflow:', error);
         return false;
     }
 }
@@ -122,7 +123,7 @@ export function toggleWorkflowFavorite(id: string): boolean {
         }
         return false;
     } catch (error) {
-        console.error('Failed to toggle favorite:', error);
+        logger.error('Failed to toggle favorite:', error);
         return false;
     }
 }
@@ -174,6 +175,32 @@ export async function importWorkflow(file: File): Promise<SavedWorkflow | null> 
             throw new Error('Invalid workflow file format');
         }
 
+        // Validate node structure
+        for (const node of workflow.nodes) {
+            if (!node.id || !node.type || !node.data) {
+                throw new Error('Invalid node structure: missing id, type, or data');
+            }
+            if (!node.data.toolId || !node.data.label) {
+                throw new Error('Invalid node data: missing toolId or label');
+            }
+            if (!Array.isArray(node.data.acceptedFormats) || typeof node.data.outputFormat !== 'string') {
+                throw new Error('Invalid node data: missing acceptedFormats or outputFormat');
+            }
+        }
+
+        // Validate edge structure
+        for (const edge of workflow.edges) {
+            if (!edge.id || !edge.source || !edge.target) {
+                throw new Error('Invalid edge structure: missing id, source, or target');
+            }
+            // Verify edge references valid nodes
+            const sourceExists = workflow.nodes.some(n => n.id === edge.source);
+            const targetExists = workflow.nodes.some(n => n.id === edge.target);
+            if (!sourceExists || !targetExists) {
+                throw new Error('Invalid edge: references non-existent node');
+            }
+        }
+
         // Save as new workflow
         return saveWorkflow(
             workflow.name,
@@ -182,7 +209,7 @@ export async function importWorkflow(file: File): Promise<SavedWorkflow | null> 
             workflow.description
         );
     } catch (error) {
-        console.error('Failed to import workflow:', error);
+        logger.error('Failed to import workflow:', error);
         return null;
     }
 }

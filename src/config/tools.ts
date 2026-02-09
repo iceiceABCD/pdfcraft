@@ -1071,6 +1071,30 @@ export const tools: Tool[] = [
     features: ['print-permission', 'copy-permission', 'edit-permission', 'annotation-permission'],
     relatedTools: ['encrypt-pdf', 'decrypt-pdf', 'remove-restrictions'],
   },
+  {
+    id: 'digital-sign-pdf',
+    slug: 'digital-sign-pdf',
+    icon: 'file-key',
+    category: 'secure-pdf',
+    acceptedFormats: ['.pdf'],
+    outputFormat: 'pdf',
+    maxFileSize: DEFAULT_MAX_FILE_SIZE,
+    maxFiles: 1,
+    features: ['x509-certificate', 'pfx-p12-pem', 'visible-signature', 'signature-reason', 'timestamp'],
+    relatedTools: ['validate-signature', 'encrypt-pdf', 'sign-pdf'],
+  },
+  {
+    id: 'validate-signature',
+    slug: 'validate-signature',
+    icon: 'shield-check',
+    category: 'secure-pdf',
+    acceptedFormats: ['.pdf'],
+    outputFormat: 'json',
+    maxFileSize: DEFAULT_MAX_FILE_SIZE,
+    maxFiles: 10,
+    features: ['verify-signatures', 'certificate-info', 'integrity-check', 'batch-validation'],
+    relatedTools: ['digital-sign-pdf', 'view-metadata', 'decrypt-pdf'],
+  },
 
   // ==================== NEW TOOLS ====================
   {

@@ -131,6 +131,16 @@ const ToolNode = memo(({ id, data, selected = false, isConnectable = true }: Too
                 </p>
             )}
 
+            {/* Output file count indicator */}
+            {data.status === 'complete' && data.outputFiles && data.outputFiles.length > 0 && (
+                <div className="mt-2 flex items-center gap-1.5">
+                    <LucideIcons.Download className="w-3 h-3 text-green-600" />
+                    <span className="text-[10px] text-green-600 font-medium">
+                        {data.outputFiles.length} file{data.outputFiles.length > 1 ? 's' : ''}
+                    </span>
+                </div>
+            )}
+
             {/* Format tags */}
             <div className="flex flex-wrap gap-1 mt-2">
                 <span className="text-[10px] px-1.5 py-0.5 bg-gray-200 rounded text-gray-600">

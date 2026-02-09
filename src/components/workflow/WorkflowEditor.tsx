@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import ReactFlow, {
     Node,
     Edge,
@@ -21,6 +22,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 import { useTranslations } from 'next-intl';
+import { logger } from '@/lib/utils/logger';
 import { WorkflowNode, WorkflowEdge, ToolNodeData, WorkflowExecutionState, SavedWorkflow, WorkflowTemplate, WorkflowOutputFile } from '@/types/workflow';
 import { validateWorkflow, validateConnection, topologicalSort, findInputNodes } from '@/lib/workflow/engine';
 import { executeNode, collectInputFiles } from '@/lib/workflow/executor';
@@ -99,6 +101,9 @@ function WorkflowEditorContent() {
     // Track created Blob URLs for cleanup
     const createdBlobUrls = useRef<Set<string>>(new Set());
 
+    // AbortController for cancelling workflow execution
+    const executionAbortController = useRef<AbortController | null>(null);
+
     /**
      * Register a Blob URL for cleanup
      */
@@ -114,7 +119,7 @@ function WorkflowEditorContent() {
             try {
                 URL.revokeObjectURL(url);
             } catch (error) {
-                console.warn('[Workflow] Failed to revoke Blob URL:', error);
+                logger.warn('[Workflow] Failed to revoke Blob URL:', error);
             }
         });
         createdBlobUrls.current.clear();
@@ -123,7 +128,11 @@ function WorkflowEditorContent() {
     // Cleanup on component unmount
     useEffect(() => {
         return () => {
-            console.log('[Workflow] Component unmounting, cleaning up resources');
+            logger.log('[Workflow] Component unmounting, cleaning up resources');
+            // Abort any running execution
+            if (executionAbortController.current) {
+                executionAbortController.current.abort();
+            }
             cleanupBlobUrls();
         };
     }, [cleanupBlobUrls]);
@@ -145,12 +154,14 @@ function WorkflowEditorContent() {
         setSavedWorkflows(getSavedWorkflows());
     }, []);
 
-    // Push to history when nodes or edges change
+    // Push to history when nodes or edges change (deep comparison via JSON)
+    const nodesSnapshot = JSON.stringify(nodes.map(n => ({ id: n.id, position: n.position, data: n.data })));
+    const edgesSnapshot = JSON.stringify(edges.map(e => ({ id: e.id, source: e.source, target: e.target })));
     useEffect(() => {
         if (nodes.length > 0 || edges.length > 0) {
             pushHistory(nodes as WorkflowNode[], edges as WorkflowEdge[]);
         }
-    }, [nodes.length, edges.length]);
+    }, [nodesSnapshot, edgesSnapshot]);
 
     // Keyboard shortcuts for undo/redo
     useEffect(() => {
@@ -220,7 +231,7 @@ function WorkflowEditorContent() {
                 );
 
                 if (!validationResult.isValid) {
-                    console.warn('Invalid connection:', validationResult.message);
+                    logger.warn('Invalid connection:', validationResult.message);
                     return;
                 }
             }
@@ -318,32 +329,46 @@ function WorkflowEditorContent() {
 
         const executionOrder = topologicalSort(nodes as WorkflowNode[], edges as WorkflowEdge[]);
         if (!executionOrder) {
-            console.error('Cannot execute workflow with cycles');
+            logger.error('Cannot execute workflow with cycles');
             return;
         }
 
-        // Create execution history record
-        const executionRecord = createExecutionRecord(
-            nodes as WorkflowNode[],
-            edges as WorkflowEdge[],
-            inputFiles.length
-        );
-        addExecutionRecord(executionRecord);
+        // Create AbortController for this execution
+        executionAbortController.current = new AbortController();
+        const abortSignal = executionAbortController.current.signal;
 
-        setExecutionState({
-            status: 'running',
-            currentNodeId: null,
-            executedNodes: [],
-            pendingNodes: [...executionOrder],
-            progress: 0,
-            startTime: new Date(),
+        // Create execution history record (inside try to prevent silent failures)
+        let executionRecord: ReturnType<typeof createExecutionRecord> | null = null;
+        try {
+            executionRecord = createExecutionRecord(
+                nodes as WorkflowNode[],
+                edges as WorkflowEdge[],
+                inputFiles.length
+            );
+            addExecutionRecord(executionRecord);
+        } catch (historyError) {
+            logger.warn('[Workflow] Failed to create execution history record:', historyError);
+            // Continue execution even if history recording fails
+        }
+
+        flushSync(() => {
+            setExecutionState({
+                status: 'running',
+                currentNodeId: null,
+                executedNodes: [],
+                pendingNodes: [...executionOrder],
+                progress: 0,
+                startTime: new Date(),
+            });
         });
 
         // Reset all node statuses
-        setNodes((nds) => nds.map(node => ({
-            ...node,
-            data: { ...node.data, status: 'idle' as const, progress: 0, error: undefined },
-        })));
+        flushSync(() => {
+            setNodes((nds) => nds.map(node => ({
+                ...node,
+                data: { ...node.data, status: 'idle' as const, progress: 0, error: undefined },
+            })));
+        });
 
         try {
             // Find input nodes and assign files to them
@@ -353,7 +378,7 @@ function WorkflowEditorContent() {
                 throw new Error('No input nodes found in workflow. Cannot execute.');
             }
 
-            console.log(
+            logger.log(
                 `[Workflow] Starting execution with ${inputFiles.length} file(s) ` +
                 `for ${inputNodes.length} input node(s): ${inputNodes.map(n => n.data.label).join(', ')}`
             );
@@ -373,24 +398,49 @@ function WorkflowEditorContent() {
             // Store outputs for each node
             const nodeOutputs = new Map<string, (Blob | WorkflowOutputFile)[]>();
 
+            // Track executed nodes locally to avoid stale closure issues
+            const localExecutedNodes: string[] = [];
+
             // Execute each node in order
             for (let i = 0; i < executionOrder.length; i++) {
+                // Check if execution was aborted
+                if (abortSignal.aborted) {
+                    logger.log('[Workflow] Execution aborted by user');
+                    throw new Error('Execution cancelled by user');
+                }
+
                 const nodeId = executionOrder[i];
-                const currentNode = nodes.find(n => n.id === nodeId) as WorkflowNode;
+                // Get fresh node state by reading from the latest nodes
+                // Use a Promise to ensure the state updater runs before we continue
+                const currentNode = await new Promise<WorkflowNode | undefined>((resolve) => {
+                    setNodes((nds) => {
+                        resolve(nds.find(n => n.id === nodeId) as WorkflowNode | undefined);
+                        return nds;
+                    });
+                });
 
-                if (!currentNode) continue;
+                if (!currentNode) {
+                    logger.warn(`[Workflow] Node ${nodeId} not found, skipping`);
+                    continue;
+                }
 
-                setExecutionState(prev => ({
-                    ...prev,
-                    currentNodeId: nodeId,
-                    progress: Math.round((i / executionOrder.length) * 100),
-                }));
+                logger.log(`[Workflow] Processing node: ${currentNode.data.label} (${nodeId})`);
 
-                setNodes((nds) => nds.map(node =>
-                    node.id === nodeId
-                        ? { ...node, data: { ...node.data, status: 'processing' as const, progress: 0 } }
-                        : node
-                ));
+                flushSync(() => {
+                    setExecutionState(prev => ({
+                        ...prev,
+                        currentNodeId: nodeId,
+                        progress: Math.round((i / executionOrder.length) * 100),
+                    }));
+                });
+
+                flushSync(() => {
+                    setNodes((nds) => nds.map(node =>
+                        node.id === nodeId
+                            ? { ...node, data: { ...node.data, status: 'processing' as const, progress: 0 } }
+                            : node
+                    ));
+                });
 
                 // Get input files for this node
                 const nodeInputFiles = collectInputFiles(
@@ -402,6 +452,23 @@ function WorkflowEditorContent() {
 
                 // If this is an input node without parent outputs, use the selected files
                 const filesToProcess = nodeInputFiles.length > 0 ? nodeInputFiles : inputFiles;
+
+                // Log input sizes for debugging data flow
+                const inputSizes = filesToProcess.map((f, idx) => {
+                    if (f instanceof File) return `[${idx}] File "${f.name}" ${f.size}B`;
+                    if ('blob' in f && (f as WorkflowOutputFile).blob) {
+                        const wf = f as WorkflowOutputFile;
+                        return `[${idx}] WOF "${wf.filename}" ${wf.blob.size}B`;
+                    }
+                    if (f instanceof Blob) return `[${idx}] Blob ${f.size}B`;
+                    return `[${idx}] unknown`;
+                });
+                logger.log(
+                    `[Workflow] Node "${currentNode.data.label}" input:`,
+                    `fromUpstream=${nodeInputFiles.length}`,
+                    `total=${filesToProcess.length}`,
+                    inputSizes.join(', ')
+                );
 
                 // Execute the node
                 const result = await executeNode(
@@ -415,6 +482,27 @@ function WorkflowEditorContent() {
                         ));
                     }
                 );
+
+                // Log output details including Blob sizes for debugging
+                const resultSize = result.result 
+                    ? (Array.isArray(result.result) 
+                        ? result.result.map((b, i) => `[${i}] ${b.size}B`).join(', ')
+                        : `${result.result.size}B`)
+                    : 'none';
+                logger.log(
+                    `[Workflow] Node "${currentNode.data.label}" (${currentNode.data.toolId}) result:`,
+                    `success=${result.success}`,
+                    `hasResult=${!!result.result}`,
+                    `resultType=${result.result ? (Array.isArray(result.result) ? `Blob[${result.result.length}]` : 'Blob') : 'none'}`,
+                    `size=${resultSize}`,
+                    `filename=${result.filename || 'none'}`
+                );
+
+                // Check abort again after async operation
+                if (abortSignal.aborted) {
+                    logger.log('[Workflow] Execution aborted after node completion');
+                    throw new Error('Execution cancelled by user');
+                }
 
                 if (!result.success) {
                     // Node execution failed - provide detailed error information
@@ -467,7 +555,7 @@ function WorkflowEditorContent() {
                         outputs = resultArray.map((item, index) => {
                             if (item instanceof Blob) {
                                 // Plain Blob - wrap with metadata
-                                const baseFilename = result.filename || `${currentNode.data.label}_output`;
+                                const baseFilename = result.filename || `${currentNode!.data.label}_output`;
                                 const filename = resultArray.length > 1 
                                     ? `${baseFilename}_${index + 1}.pdf`
                                     : `${baseFilename}.pdf`;
@@ -495,49 +583,111 @@ function WorkflowEditorContent() {
                             }];
                         }
                     }
+                } else {
+                    // Processor returned success but no result blob (e.g. extract-images, extract-attachments)
+                    // Pass through input files so downstream nodes can still process
+                    logger.warn(`[Workflow] Node "${currentNode.data.label}" produced no output blob, passing through input files`);
+                    outputs = filesToProcess.map((f, idx) => {
+                        if (f instanceof File) {
+                            return { blob: f, filename: f.name };
+                        }
+                        if ('blob' in f && (f as WorkflowOutputFile).blob) {
+                            return f as WorkflowOutputFile;
+                        }
+                        return { blob: f as Blob, filename: `passthrough_${idx + 1}.pdf` };
+                    });
                 }
 
                 nodeOutputs.set(nodeId, outputs);
+                localExecutedNodes.push(nodeId);
 
-                setNodes((nds) => nds.map(node =>
-                    node.id === nodeId
-                        ? { ...node, data: { ...node.data, status: 'complete' as const, progress: 100, outputFiles: outputs } }
-                        : node
-                ));
+                flushSync(() => {
+                    setNodes((nds) => nds.map(node =>
+                        node.id === nodeId
+                            ? { ...node, data: { ...node.data, status: 'complete' as const, progress: 100, outputFiles: outputs } }
+                            : node
+                    ));
+                });
 
-                setExecutionState(prev => ({
-                    ...prev,
-                    executedNodes: [...prev.executedNodes, nodeId],
-                    pendingNodes: prev.pendingNodes.filter(id => id !== nodeId),
-                }));
+                flushSync(() => {
+                    setExecutionState(prev => ({
+                        ...prev,
+                        executedNodes: [...localExecutedNodes],
+                        pendingNodes: prev.pendingNodes.filter(id => id !== nodeId),
+                    }));
+                });
             }
 
-            // Get final output from the last executed node
-            const lastNodeId = executionOrder[executionOrder.length - 1];
-            const finalOutputs = nodeOutputs.get(lastNodeId) || [];
+            // Collect final outputs from all terminal nodes (nodes with no outgoing edges)
+            // This handles workflows with multiple output branches
+            const nodesWithOutgoing = new Set(edges.map(e => e.source));
+            const terminalNodeIds = executionOrder.filter(id => !nodesWithOutgoing.has(id));
+            
+            // If no terminal nodes found (shouldn't happen), fall back to last node
+            const outputNodeIds = terminalNodeIds.length > 0 
+                ? terminalNodeIds 
+                : [executionOrder[executionOrder.length - 1]];
+            
+            const finalOutputs: (Blob | WorkflowOutputFile)[] = [];
+            for (const nodeId of outputNodeIds) {
+                const nodeOutput = nodeOutputs.get(nodeId);
+                if (nodeOutput && nodeOutput.length > 0) {
+                    finalOutputs.push(...nodeOutput);
+                }
+            }
 
-            setExecutionState(prev => ({
-                ...prev,
-                status: 'complete',
-                currentNodeId: null,
-                progress: 100,
-                endTime: new Date(),
-                outputFiles: finalOutputs,
-            }));
-
-            // Update execution history record as completed
-            completeExecutionRecord(
-                executionRecord.id,
-                'completed',
-                executionOrder.length
+            logger.log(
+                `[Workflow] Execution complete. Terminal nodes: ${outputNodeIds.length}, Output files: ${finalOutputs.length}`,
+                finalOutputs.map((f, i) => {
+                    if ('blob' in f && (f as WorkflowOutputFile).blob) {
+                        const wf = f as WorkflowOutputFile;
+                        return `[${i}] "${wf.filename}" ${wf.blob.size}B`;
+                    }
+                    if (f instanceof Blob) return `[${i}] Blob ${f.size}B`;
+                    return `[${i}] unknown`;
+                }).join(', ')
             );
 
+            flushSync(() => {
+                setExecutionState(prev => ({
+                    ...prev,
+                    status: 'complete',
+                    currentNodeId: null,
+                    progress: 100,
+                    endTime: new Date(),
+                    outputFiles: finalOutputs,
+                }));
+            });
+
+            // Update execution history record as completed
+            if (executionRecord) {
+                try {
+                    completeExecutionRecord(
+                        executionRecord.id,
+                        'completed',
+                        executionOrder.length
+                    );
+                } catch (historyError) {
+                    logger.warn('[Workflow] Failed to update execution history:', historyError);
+                }
+            }
+
         } catch (error) {
-            console.error('[Workflow Execution] Workflow execution failed:', error);
+            logger.error('[Workflow Execution] Workflow execution failed:', error);
             
             // Extract detailed error information
             const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-            const failedNodeId = (error as Error & { nodeId?: string })?.nodeId || executionState.currentNodeId || '';
+            const isCancelled = errorMessage.includes('cancelled by user');
+            
+            // Get current execution state for failed node info
+            let failedNodeId = '';
+            let successfulCount = 0;
+            setExecutionState(prev => {
+                failedNodeId = (error as Error & { nodeId?: string })?.nodeId || prev.currentNodeId || '';
+                successfulCount = prev.executedNodes.length;
+                return prev;
+            });
+            
             const errorCode = (error as Error & { code?: string })?.code;
             
             // Find the failed node name for better error reporting
@@ -545,32 +695,39 @@ function WorkflowEditorContent() {
             const failedNodeName = failedNode?.data.label || 'Unknown node';
             
             // Build user-friendly error message
-            let userMessage = `Workflow failed at "${failedNodeName}": ${errorMessage}`;
+            const userMessage = isCancelled 
+                ? 'Workflow execution was cancelled'
+                : `Workflow failed at "${failedNodeName}": ${errorMessage}`;
             
             // Update execution state with detailed error
             setExecutionState(prev => ({
                 ...prev,
-                status: 'error',
+                status: isCancelled ? 'idle' : 'error',
                 currentNodeId: null,
                 endTime: new Date(),
-                error: {
+                error: isCancelled ? undefined : {
                     nodeId: failedNodeId,
                     message: userMessage,
                 },
             }));
             
-            // Update execution history record as failed
-            const successfulCount = executionState.executedNodes.length;
-            completeExecutionRecord(
-                executionRecord.id,
-                'failed',
-                successfulCount,
-                userMessage,
-                failedNodeId
-            );
+            // Update execution history record
+            if (executionRecord) {
+                try {
+                    completeExecutionRecord(
+                        executionRecord.id,
+                        isCancelled ? 'cancelled' : 'failed',
+                        successfulCount,
+                        isCancelled ? undefined : userMessage,
+                        isCancelled ? undefined : failedNodeId
+                    );
+                } catch (historyError) {
+                    logger.warn('[Workflow] Failed to update execution history:', historyError);
+                }
+            }
             
-            // Ensure the failed node shows error status
-            if (failedNodeId) {
+            // Ensure the failed node shows error status (if not cancelled)
+            if (failedNodeId && !isCancelled) {
                 setNodes((nds) => nds.map(node =>
                     node.id === failedNodeId && node.data.status !== 'error'
                         ? { 
@@ -584,13 +741,21 @@ function WorkflowEditorContent() {
                         : node
                 ));
             }
+        } finally {
+            // Clear the abort controller
+            executionAbortController.current = null;
         }
-    }, [nodes, edges, setNodes, executionState]);
+    }, [nodes, edges, setNodes]);
 
     /**
      * Stop workflow execution
      */
     const stopExecution = useCallback(() => {
+        // Abort the running execution
+        if (executionAbortController.current) {
+            executionAbortController.current.abort();
+        }
+
         setExecutionState(prev => ({
             ...prev,
             status: 'idle',
@@ -614,34 +779,68 @@ function WorkflowEditorContent() {
      */
     const retryFromFailedNode = useCallback(async () => {
         if (executionState.status !== 'error' || !executionState.error?.nodeId) {
-            console.warn('[Workflow] No failed node to retry from');
+            logger.warn('[Workflow] No failed node to retry from');
             return;
         }
 
         const failedNodeId = executionState.error.nodeId;
         
-        // Clear error state on the failed node and subsequent nodes
-        setNodes((nds) => nds.map(node => ({
-            ...node,
-            data: {
-                ...node.data,
-                status: node.id === failedNodeId ? 'idle' as const : node.data.status,
-                error: node.id === failedNodeId ? undefined : node.data.error,
-                progress: node.id === failedNodeId ? 0 : node.data.progress,
-            },
-        })));
+        // Get execution order
+        const executionOrder = topologicalSort(nodes as WorkflowNode[], edges as WorkflowEdge[]);
+        if (!executionOrder) {
+            logger.error('[Workflow] Cannot retry - workflow has cycles');
+            return;
+        }
+
+        // Find the index of the failed node
+        const failedIndex = executionOrder.indexOf(failedNodeId);
+        if (failedIndex === -1) {
+            logger.error('[Workflow] Failed node not found in execution order');
+            return;
+        }
+
+        // Get nodes that need to be re-executed (from failed node onwards)
+        const nodesToRetry = executionOrder.slice(failedIndex);
+        
+        // Clear error state on the failed node and reset subsequent nodes
+        setNodes((nds) => nds.map(node => {
+            if (nodesToRetry.includes(node.id)) {
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        status: 'idle' as const,
+                        error: undefined,
+                        progress: 0,
+                    },
+                };
+            }
+            return node;
+        }));
+
+        // Clear error from execution state but keep executed nodes info
+        setExecutionState(prev => ({
+            ...prev,
+            status: 'idle',
+            error: undefined,
+        }));
 
         // Restart execution with the original input files
         if (selectedFiles.length > 0) {
             await executeWorkflow(selectedFiles);
         }
-    }, [executionState, selectedFiles, executeWorkflow, setNodes]);
+    }, [executionState, selectedFiles, executeWorkflow, setNodes, nodes, edges]);
 
     /**
      * Clear all workflow state (reset all nodes)
      */
     const clearWorkflowState = useCallback(() => {
-        console.log('[Workflow] Clearing workflow state and cleaning up resources');
+        logger.log('[Workflow] Clearing workflow state and cleaning up resources');
+        
+        // Abort any running execution
+        if (executionAbortController.current) {
+            executionAbortController.current.abort();
+        }
         
         // Cleanup Blob URLs
         cleanupBlobUrls();
@@ -700,7 +899,7 @@ function WorkflowEditorContent() {
         // Clear undo/redo history
         clearHistory();
         
-        console.log('[Workflow] Loaded from history:', record.workflowName || 'Unnamed');
+        logger.log('[Workflow] Loaded from history:', record.workflowName || 'Unnamed');
     }, [clearHistory, clearWorkflowState, setNodes, setEdges]);
 
     /**

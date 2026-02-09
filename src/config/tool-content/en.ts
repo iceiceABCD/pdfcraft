@@ -2564,5 +2564,59 @@ export const toolContentEn: Record<string, ToolContent> = {
       { question: 'Does it work on mobile devices?', answer: 'Yes, the PDF Reader works on all devices with a modern web browser.' },
     ],
   },
+
+  'digital-sign-pdf': {
+    title: 'Digital Signature',
+    metaDescription: 'Add X.509 digital signatures to PDF documents. Sign PDFs with PFX, P12, or PEM certificates for legal validity.',
+    keywords: ['digital signature pdf', 'x509 certificate', 'pfx sign pdf', 'p12 sign pdf', 'pem sign pdf', 'legally sign pdf'],
+    description: `
+      <p>Digital Signature allows you to add cryptographic X.509 digital signatures to PDF documents. Unlike simple drawn signatures, digital signatures provide legal validity and document integrity verification.</p>
+      <p>Upload your certificate file (PFX, P12, or PEM format), enter the password, and sign your PDF. You can add visible signatures with custom text, images, and positioning, or invisible signatures for document integrity only.</p>
+      <p>All signing happens locally in your browser. Your certificate and documents are never uploaded to any server.</p>
+    `,
+    howToUse: [
+      { step: 1, title: 'Upload PDF', description: 'Upload the PDF document you want to digitally sign.' },
+      { step: 2, title: 'Load Certificate', description: 'Upload your X.509 certificate file (.pfx, .p12, or .pem) and enter the password.' },
+      { step: 3, title: 'Configure Signature', description: 'Optionally add reason, location, and visible signature with custom text or image.' },
+      { step: 4, title: 'Sign and Download', description: 'Click Sign PDF to apply the digital signature and download the signed document.' },
+    ],
+    useCases: [
+      { title: 'Legal Documents', description: 'Sign contracts, agreements, and legal documents with legally binding digital signatures.', icon: 'scale' },
+      { title: 'Business Approvals', description: 'Digitally sign invoices, purchase orders, and approval documents for audit trails.', icon: 'briefcase' },
+      { title: 'Document Integrity', description: 'Ensure documents have not been tampered with after signing.', icon: 'shield-check' },
+    ],
+    faq: [
+      { question: 'What certificate formats are supported?', answer: 'PFX (.pfx), PKCS#12 (.p12), and PEM (.pem) certificate formats are supported.' },
+      { question: 'Is the signature legally valid?', answer: 'Yes, X.509 digital signatures are legally recognized in most jurisdictions when using a valid certificate.' },
+      { question: 'Can I add a visible signature?', answer: 'Yes, you can add a visible signature with custom text, image, position, and styling.' },
+    ],
+  },
+
+  'validate-signature': {
+    title: 'Validate Signature',
+    metaDescription: 'Verify digital signatures in PDF documents. Check certificate validity, signer information, and document integrity.',
+    keywords: ['validate pdf signature', 'verify digital signature', 'check pdf certificate', 'signature verification'],
+    description: `
+      <p>Validate Signature allows you to verify digital signatures in PDF documents. Check if signatures are valid, view certificate information, and confirm document integrity.</p>
+      <p>Upload a signed PDF to see all signatures, their validity status, signer information, and whether the document has been modified after signing.</p>
+      <p>All validation happens locally in your browser. Your documents are never uploaded to any server.</p>
+    `,
+    howToUse: [
+      { step: 1, title: 'Upload Signed PDF', description: 'Upload a PDF document that contains digital signatures.' },
+      { step: 2, title: 'View Results', description: 'See all signatures found in the document with their validity status.' },
+      { step: 3, title: 'Check Details', description: 'View certificate information, signer details, and signing timestamp.' },
+      { step: 4, title: 'Export Report', description: 'Optionally download a JSON report of the validation results.' },
+    ],
+    useCases: [
+      { title: 'Document Verification', description: 'Verify that signed documents are authentic and have not been tampered with.', icon: 'shield-check' },
+      { title: 'Compliance Audit', description: 'Check signature validity for compliance and audit purposes.', icon: 'clipboard-check' },
+      { title: 'Certificate Review', description: 'View certificate details and expiration dates for signed documents.', icon: 'award' },
+    ],
+    faq: [
+      { question: 'What does "valid" mean?', answer: 'A valid signature means the document has not been modified since signing and the certificate chain is intact.' },
+      { question: 'Can I validate multiple PDFs?', answer: 'Yes, you can upload multiple PDFs and validate all signatures in batch.' },
+      { question: 'Why might a signature be invalid?', answer: 'Signatures may be invalid if the document was modified, the certificate expired, or the certificate is not trusted.' },
+    ],
+  },
 };
 

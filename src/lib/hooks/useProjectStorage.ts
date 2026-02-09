@@ -21,6 +21,7 @@ import {
   clearAllProjects,
   isIndexedDBAvailable,
 } from '@/lib/storage/project-db';
+import { logger } from '@/lib/utils/logger';
 
 export interface UseProjectStorageReturn {
   projects: ProjectState[];
@@ -67,7 +68,7 @@ export function useProjectStorage(): UseProjectStorageReturn {
           setProjects(allProjects);
         } catch (err) {
           setError('Failed to load projects');
-          console.error('Failed to load projects:', err);
+          logger.error('Failed to load projects:', err);
         }
       }
       
@@ -86,7 +87,7 @@ export function useProjectStorage(): UseProjectStorageReturn {
       setError(null);
     } catch (err) {
       setError('Failed to refresh projects');
-      console.error('Failed to refresh projects:', err);
+      logger.error('Failed to refresh projects:', err);
     }
   }, [isAvailable]);
 
@@ -116,7 +117,7 @@ export function useProjectStorage(): UseProjectStorageReturn {
       return project;
     } catch (err) {
       setError('Failed to create project');
-      console.error('Failed to create project:', err);
+      logger.error('Failed to create project:', err);
       return null;
     }
   }, [isAvailable, refreshProjects]);
@@ -133,7 +134,7 @@ export function useProjectStorage(): UseProjectStorageReturn {
       return project;
     } catch (err) {
       setError('Failed to load project');
-      console.error('Failed to load project:', err);
+      logger.error('Failed to load project:', err);
       return null;
     }
   }, [isAvailable]);
@@ -152,7 +153,7 @@ export function useProjectStorage(): UseProjectStorageReturn {
       setError(null);
     } catch (err) {
       setError('Failed to save project');
-      console.error('Failed to save project:', err);
+      logger.error('Failed to save project:', err);
     }
   }, [isAvailable, currentProject, refreshProjects]);
 
@@ -179,7 +180,7 @@ export function useProjectStorage(): UseProjectStorageReturn {
       setError(null);
     } catch (err) {
       setError('Failed to delete project');
-      console.error('Failed to delete project:', err);
+      logger.error('Failed to delete project:', err);
     }
   }, [isAvailable, currentProject, refreshProjects]);
 
@@ -193,7 +194,7 @@ export function useProjectStorage(): UseProjectStorageReturn {
       setError(null);
     } catch (err) {
       setError('Failed to clear projects');
-      console.error('Failed to clear projects:', err);
+      logger.error('Failed to clear projects:', err);
     }
   }, [isAvailable]);
 
@@ -203,7 +204,7 @@ export function useProjectStorage(): UseProjectStorageReturn {
     try {
       return await getProjectsByTool(toolId);
     } catch (err) {
-      console.error('Failed to get tool projects:', err);
+      logger.error('Failed to get tool projects:', err);
       return [];
     }
   }, [isAvailable]);
@@ -214,7 +215,7 @@ export function useProjectStorage(): UseProjectStorageReturn {
     try {
       return await getInProgressProjects();
     } catch (err) {
-      console.error('Failed to get incomplete projects:', err);
+      logger.error('Failed to get incomplete projects:', err);
       return [];
     }
   }, [isAvailable]);

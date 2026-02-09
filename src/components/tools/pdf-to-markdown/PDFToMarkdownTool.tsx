@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { FileText, Trash2, RefreshCw, CheckCircle2, AlertCircle, Settings2, Code, Eye } from 'lucide-react';
 import { marked } from 'marked';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { pdfToMarkdown } from '@/lib/pdf/processors/pdf-to-markdown';
 import type { UploadedFile, ProcessOutput } from '@/types/pdf';
+import { sanitizeHtml } from '@/lib/utils/html-sanitizer';
 
 /**
  * Generate a unique ID for files
@@ -397,7 +398,7 @@ export function PDFToMarkdownTool({ className = '' }: PDFToMarkdownToolProps) {
                                     prose-td:p-2 prose-td:border prose-td:border-gray-300
                                     dark:prose-code:bg-gray-800 dark:prose-code:text-gray-200
                                     dark:prose-th:bg-gray-800 dark:prose-td:border-gray-700 dark:prose-th:border-gray-700"
-                                    dangerouslySetInnerHTML={{ __html: htmlContent }}
+                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }}
                                 />
                             ) : (
                                 <pre className="p-4 rounded-lg bg-[hsl(var(--color-muted))] text-[hsl(var(--color-foreground))] overflow-x-auto text-sm font-mono whitespace-pre-wrap break-words">

@@ -1234,4 +1234,48 @@ export const toolContentKo: Record<string, ToolContent> = {
       { question: 'PDF/A에서 다시 변환할 수 있나요?', answer: 'PDF/A 파일은 표준 PDF이며 정상적으로 열 수 있습니다. 아카이브 기능은 제한을 추가하지만 제약은 아닙니다.' },
     ],
   },
+
+  'digital-sign-pdf': {
+    title: '디지털 서명',
+    metaDescription: 'PDF 문서에 X.509 디지털 서명을 추가합니다. PFX, P12 또는 PEM 인증서로 PDF에 서명하여 법적 효력을 부여합니다.',
+    keywords: ['pdf 디지털 서명', 'x509 인증서', 'pfx 서명', 'p12 서명', 'pem 서명', '전자 서명'],
+    description: '<p>디지털 서명 도구를 사용하면 PDF 문서에 암호화된 X.509 디지털 서명을 추가할 수 있습니다.</p>',
+    howToUse: [
+      { step: 1, title: 'PDF 업로드', description: '디지털 서명할 PDF 문서를 업로드합니다.' },
+      { step: 2, title: '인증서 로드', description: 'X.509 인증서 파일(.pfx, .p12 또는 .pem)을 업로드하고 비밀번호를 입력합니다.' },
+      { step: 3, title: '서명 및 다운로드', description: 'PDF 서명을 클릭하여 디지털 서명을 적용하고 서명된 문서를 다운로드합니다.' },
+    ],
+    useCases: [
+      { title: '법적 문서', description: '법적 구속력이 있는 디지털 서명으로 계약서와 법적 문서에 서명합니다.', icon: 'scale' },
+      { title: '비즈니스 승인', description: '감사 추적을 위해 송장과 승인 문서에 디지털 서명합니다.', icon: 'briefcase' },
+      { title: '문서 무결성', description: '서명 후 문서가 변조되지 않았음을 확인합니다.', icon: 'shield-check' },
+    ],
+    faq: [
+      { question: '어떤 인증서 형식이 지원되나요?', answer: 'PFX(.pfx), PKCS#12(.p12) 및 PEM(.pem) 인증서 형식이 지원됩니다.' },
+      { question: '서명이 법적으로 유효한가요?', answer: '예, 유효한 인증서를 사용한 X.509 디지털 서명은 대부분의 관할권에서 법적으로 인정됩니다.' },
+      { question: '가시적 서명을 추가할 수 있나요?', answer: '예, 사용자 정의 텍스트, 이미지, 위치 및 스타일이 있는 가시적 서명을 추가할 수 있습니다.' },
+    ],
+  },
+
+  'validate-signature': {
+    title: '서명 검증',
+    metaDescription: 'PDF 문서의 디지털 서명을 검증합니다. 인증서 유효성, 서명자 정보 및 문서 무결성을 확인합니다.',
+    keywords: ['pdf 서명 검증', '디지털 서명 검증', 'pdf 인증서 확인', '서명 검증'],
+    description: '<p>서명 검증 도구를 사용하면 PDF 문서의 디지털 서명을 검증할 수 있습니다.</p>',
+    howToUse: [
+      { step: 1, title: '서명된 PDF 업로드', description: '디지털 서명이 포함된 PDF 문서를 업로드합니다.' },
+      { step: 2, title: '결과 보기', description: '문서에서 발견된 모든 서명과 유효성 상태를 확인합니다.' },
+      { step: 3, title: '보고서 내보내기', description: '선택적으로 검증 결과의 JSON 보고서를 다운로드합니다.' },
+    ],
+    useCases: [
+      { title: '문서 검증', description: '서명된 문서가 진본이며 변조되지 않았음을 확인합니다.', icon: 'shield-check' },
+      { title: '규정 준수 감사', description: '규정 준수 및 감사 목적으로 서명 유효성을 확인합니다.', icon: 'clipboard-check' },
+      { title: '인증서 검토', description: '서명된 문서의 인증서 세부 정보와 만료 날짜를 봅니다.', icon: 'award' },
+    ],
+    faq: [
+      { question: '"유효"는 무엇을 의미하나요?', answer: '유효한 서명은 서명 이후 문서가 수정되지 않았으며 인증서 체인이 완전함을 의미합니다.' },
+      { question: '여러 PDF를 검증할 수 있나요?', answer: '예, 여러 PDF를 업로드하고 모든 서명을 일괄 검증할 수 있습니다.' },
+      { question: '서명이 무효가 되는 이유는?', answer: '문서가 수정되었거나, 인증서가 만료되었거나, 인증서가 신뢰되지 않는 경우 서명이 무효가 될 수 있습니다.' },
+    ],
+  },
 };

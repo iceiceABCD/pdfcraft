@@ -329,10 +329,10 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
       <div className="text-sm text-[hsl(var(--color-muted-foreground))] text-center max-w-sm leading-relaxed">
         {description || (
           <>
-            <p className="mb-2">Drag and drop files here, or click to browse</p>
+            <p className="mb-2">{t('fileUploader.dragDrop')}</p>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[hsl(var(--color-muted)/0.5)] text-xs font-medium">
-              <span className="opacity-70">Support:</span>
-              <span>Paste (Ctrl+V)</span>
+              <span className="opacity-70">{t('fileUploader.support')}:</span>
+              <span>{t('fileUploader.paste')}</span>
             </div>
           </>
         )}
@@ -350,11 +350,11 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
       {/* Drag overlay */}
       {isDragging && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[hsl(var(--color-background)/0.9)] backdrop-blur-sm rounded-[2rem] z-10 transition-opacity duration-200">
-          <div className="p-4 rounded-full bg-[hsl(var(--color-primary)/0.1)] text-[hsl(var(--color-primary))] mb-4 animate-bounce">
+          <div className="p-4 rounded-full bg-[hsl(var(--color-primary)/0.1)] text-[hsl(var(--color-primary))] mb-4 motion-safe:animate-bounce">
             <Plus className="w-8 h-8" />
           </div>
           <p className="text-xl font-bold text-[hsl(var(--color-primary))]">
-            Drop files to upload
+            {t('fileUploader.dropToUpload')}
           </p>
         </div>
       )}

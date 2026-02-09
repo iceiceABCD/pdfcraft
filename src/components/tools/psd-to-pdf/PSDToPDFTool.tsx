@@ -296,8 +296,8 @@ export function PSDToPDFTool({ className = '' }: PSDToPDFToolProps) {
                 onFilesSelected={handleFilesSelected}
                 onError={handleUploadError}
                 disabled={isProcessing}
-                label="Upload PSD/PSB Files"
-                description="Drag and drop PSD/PSB files here, or click to browse."
+                label={tTools('psdToPdf.uploadLabel') || t('buttons.upload')}
+                description={tTools('psdToPdf.uploadDescription')}
             />
 
             {/* Error Message */}
@@ -328,7 +328,7 @@ export function PSDToPDFTool({ className = '' }: PSDToPDFToolProps) {
                     </div>
 
                     <p className="text-sm text-[hsl(var(--color-muted-foreground))] mb-4">
-                        Drag and drop to reorder files.
+                        {tTools('psdToPdf.reorderHint') || 'Drag and drop to reorder files.'}
                     </p>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">

@@ -89,6 +89,8 @@ import { FontToOutlineTool } from '@/components/tools/font-to-outline';
 import { ExtractTablesTool } from '@/components/tools/extract-tables';
 import { OCGManagerTool } from '@/components/tools/ocg-manager';
 import { PDFReaderTool } from '@/components/tools/pdf-reader';
+import { DigitalSignPDFTool } from '@/components/tools/digital-sign';
+import { ValidateSignatureTool } from '@/components/tools/validate-signature';
 import { generateToolMetadata } from '@/lib/seo/metadata';
 import { JsonLd } from '@/components/seo/JsonLd';
 import {
@@ -410,6 +412,10 @@ export default async function ToolPageRoute({ params }: ToolPageParams) {
         return <OCGManagerTool />;
       case 'pdf-reader':
         return <PDFReaderTool />;
+      case 'digital-sign-pdf':
+        return <DigitalSignPDFTool />;
+      case 'validate-signature':
+        return <ValidateSignatureTool />;
       // Add more tool cases here as they are implemented
       default:
         return (

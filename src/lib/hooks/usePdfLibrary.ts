@@ -134,7 +134,7 @@ export function usePdfLibrary(options: UsePdfLibraryOptions): UsePdfLibraryResul
       if (isMountedRef.current) {
         setStatus(getLibraryStatus());
       }
-    }, 100);
+    }, 500);
     
     return () => clearInterval(interval);
   }, [isLoading]);

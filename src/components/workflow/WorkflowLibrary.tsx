@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { logger } from '@/lib/utils/logger';
 import { workflowTemplates } from '@/config/workflow-templates';
 import { WorkflowTemplate, SavedWorkflow } from '@/types/workflow';
 import { WorkflowHistory } from './WorkflowHistory';
@@ -96,7 +97,7 @@ export function WorkflowLibrary({
                     return translated;
                 }
             } catch (e) {
-                console.warn(`Translation missing for template name: ${template.id}`);
+                logger.warn(`Translation missing for template name: ${template.id}`);
             }
         }
         return template.name;
@@ -113,7 +114,7 @@ export function WorkflowLibrary({
                     return translated;
                 }
             } catch (e) {
-                console.warn(`Translation missing for template description: ${template.id}`);
+                logger.warn(`Translation missing for template description: ${template.id}`);
             }
         }
         return template.description;

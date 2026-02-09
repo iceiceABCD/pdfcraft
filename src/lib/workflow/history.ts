@@ -5,6 +5,7 @@
 
 import type { WorkflowExecutionRecord, WorkflowHistoryStorage } from '@/types/workflow-history';
 import type { WorkflowNode, WorkflowEdge } from '@/types/workflow';
+import { logger } from '@/lib/utils/logger';
 
 const STORAGE_KEY = 'pdfcraft_workflow_history';
 const MAX_RECORDS = 50; // Keep last 50 executions
@@ -26,7 +27,7 @@ export function loadExecutionHistory(): WorkflowExecutionRecord[] {
             endTime: record.endTime ? new Date(record.endTime) : undefined,
         }));
     } catch (error) {
-        console.error('[Workflow History] Failed to load history:', error);
+        logger.error('[Workflow History] Failed to load history:', error);
         return [];
     }
 }
@@ -46,7 +47,7 @@ function saveExecutionHistory(records: WorkflowExecutionRecord[]): void {
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(storage));
     } catch (error) {
-        console.error('[Workflow History] Failed to save history:', error);
+        logger.error('[Workflow History] Failed to save history:', error);
     }
 }
 
@@ -60,12 +61,22 @@ export function createExecutionRecord(
     workflowName?: string,
     workflowId?: string
 ): WorkflowExecutionRecord {
+    // Deep copy nodes but strip non-serializable data (File/Blob objects)
+    const serializableNodes = nodes.map(node => ({
+        ...node,
+        data: {
+            ...node.data,
+            inputFiles: undefined,
+            outputFiles: undefined,
+        },
+    }));
+
     return {
         id: `exec_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         workflowName,
         workflowId,
-        nodes: JSON.parse(JSON.stringify(nodes)), // Deep copy
-        edges: JSON.parse(JSON.stringify(edges)), // Deep copy
+        nodes: JSON.parse(JSON.stringify(serializableNodes)),
+        edges: JSON.parse(JSON.stringify(edges)),
         fileCount,
         startTime: new Date(),
         status: 'running',
@@ -147,7 +158,7 @@ export function clearExecutionHistory(): void {
     try {
         localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
-        console.error('[Workflow History] Failed to clear history:', error);
+        logger.error('[Workflow History] Failed to clear history:', error);
     }
 }
 

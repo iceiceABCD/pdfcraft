@@ -1731,4 +1731,48 @@ export const toolContentEs: Record<string, ToolContent> = {
       { question: '¿Puedo convertir de vuelta desde PDF/A?', answer: 'Los archivos PDF/A son PDFs estándar y se pueden abrir normalmente. Las características de archivo agregan restricciones, no limitaciones.' },
     ],
   },
+
+  'digital-sign-pdf': {
+    title: 'Firma Digital',
+    metaDescription: 'Añade firmas digitales X.509 a documentos PDF. Firma PDFs con certificados PFX, P12 o PEM para validez legal.',
+    keywords: ['firma digital pdf', 'certificado x509', 'firma pfx', 'firma p12', 'firma pem', 'firma electrónica'],
+    description: '<p>La herramienta de Firma Digital te permite añadir firmas digitales X.509 criptográficas a documentos PDF.</p>',
+    howToUse: [
+      { step: 1, title: 'Subir PDF', description: 'Sube el documento PDF que deseas firmar digitalmente.' },
+      { step: 2, title: 'Cargar Certificado', description: 'Sube tu archivo de certificado X.509 (.pfx, .p12 o .pem) e ingresa la contraseña.' },
+      { step: 3, title: 'Firmar y Descargar', description: 'Haz clic en Firmar PDF para aplicar la firma digital y descarga el documento firmado.' },
+    ],
+    useCases: [
+      { title: 'Documentos Legales', description: 'Firma contratos y documentos legales con firmas digitales legalmente vinculantes.', icon: 'scale' },
+      { title: 'Aprobaciones Empresariales', description: 'Firma digitalmente facturas y documentos de aprobación para pistas de auditoría.', icon: 'briefcase' },
+      { title: 'Integridad del Documento', description: 'Asegura que los documentos no han sido alterados después de firmar.', icon: 'shield-check' },
+    ],
+    faq: [
+      { question: '¿Qué formatos de certificado son compatibles?', answer: 'Se admiten los formatos de certificado PFX (.pfx), PKCS#12 (.p12) y PEM (.pem).' },
+      { question: '¿La firma es legalmente válida?', answer: 'Sí, las firmas digitales X.509 con un certificado válido son legalmente reconocidas en la mayoría de jurisdicciones.' },
+      { question: '¿Puedo añadir una firma visible?', answer: 'Sí, puedes añadir una firma visible con texto, imagen, posición y estilo personalizados.' },
+    ],
+  },
+
+  'validate-signature': {
+    title: 'Validar Firma',
+    metaDescription: 'Verifica firmas digitales en documentos PDF. Comprueba la validez del certificado, información del firmante e integridad del documento.',
+    keywords: ['validar firma pdf', 'verificar firma digital', 'comprobar certificado pdf', 'verificación de firma'],
+    description: '<p>La herramienta Validar Firma te permite verificar firmas digitales en documentos PDF.</p>',
+    howToUse: [
+      { step: 1, title: 'Subir PDF Firmado', description: 'Sube un documento PDF que contenga firmas digitales.' },
+      { step: 2, title: 'Ver Resultados', description: 'Ve todas las firmas encontradas en el documento con su estado de validez.' },
+      { step: 3, title: 'Exportar Informe', description: 'Opcionalmente descarga un informe JSON de los resultados de validación.' },
+    ],
+    useCases: [
+      { title: 'Verificación de Documentos', description: 'Verifica que los documentos firmados son auténticos y no han sido alterados.', icon: 'shield-check' },
+      { title: 'Auditoría de Cumplimiento', description: 'Comprueba la validez de las firmas para propósitos de cumplimiento y auditoría.', icon: 'clipboard-check' },
+      { title: 'Revisión de Certificados', description: 'Ve los detalles del certificado y fechas de expiración de documentos firmados.', icon: 'award' },
+    ],
+    faq: [
+      { question: '¿Qué significa "válido"?', answer: 'Una firma válida significa que el documento no ha sido modificado desde la firma y la cadena de certificados está intacta.' },
+      { question: '¿Puedo validar múltiples PDFs?', answer: 'Sí, puedes subir múltiples PDFs y validar todas las firmas en lote.' },
+      { question: '¿Por qué una firma podría ser inválida?', answer: 'Las firmas pueden ser inválidas si el documento fue modificado, el certificado expiró o el certificado no es de confianza.' },
+    ],
+  },
 };

@@ -282,8 +282,8 @@ export function RotateCustomTool({ className = '' }: RotateCustomToolProps) {
                     onFilesSelected={handleFilesSelected}
                     onError={handleUploadError}
                     disabled={isProcessing}
-                    label="Upload PDF File"
-                    description="Drag and drop a PDF file here, or click to browse."
+                    label={tTools('rotateCustom.uploadLabel') || t('buttons.upload')}
+                    description={tTools('rotateCustom.uploadDescription')}
                 />
             )}
 

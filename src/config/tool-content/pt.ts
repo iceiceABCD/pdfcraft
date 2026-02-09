@@ -1118,4 +1118,48 @@ export const toolContentPt: Record<string, ToolContent> = {
       { question: 'Posso converter de volta de PDF/A?', answer: 'Arquivos PDF/A são PDFs padrão e podem ser abertos normalmente. As características de arquivo adicionam restrições, não limitações.' },
     ],
   },
+
+  'digital-sign-pdf': {
+    title: 'Assinatura Digital',
+    metaDescription: 'Adicione assinaturas digitais X.509 a documentos PDF. Assine PDFs com certificados PFX, P12 ou PEM para validade legal.',
+    keywords: ['assinatura digital pdf', 'certificado x509', 'assinatura pfx', 'assinatura p12', 'assinatura pem', 'assinatura eletrônica'],
+    description: '<p>A ferramenta de Assinatura Digital permite adicionar assinaturas digitais X.509 criptográficas a documentos PDF.</p>',
+    howToUse: [
+      { step: 1, title: 'Enviar PDF', description: 'Envie o documento PDF que deseja assinar digitalmente.' },
+      { step: 2, title: 'Carregar Certificado', description: 'Envie seu arquivo de certificado X.509 (.pfx, .p12 ou .pem) e digite a senha.' },
+      { step: 3, title: 'Assinar e Baixar', description: 'Clique em Assinar PDF para aplicar a assinatura digital e baixe o documento assinado.' },
+    ],
+    useCases: [
+      { title: 'Documentos Legais', description: 'Assine contratos e documentos legais com assinaturas digitais juridicamente vinculativas.', icon: 'scale' },
+      { title: 'Aprovações Empresariais', description: 'Assine digitalmente faturas e documentos de aprovação para trilhas de auditoria.', icon: 'briefcase' },
+      { title: 'Integridade do Documento', description: 'Garanta que os documentos não foram alterados após a assinatura.', icon: 'shield-check' },
+    ],
+    faq: [
+      { question: 'Quais formatos de certificado são suportados?', answer: 'Os formatos de certificado PFX (.pfx), PKCS#12 (.p12) e PEM (.pem) são suportados.' },
+      { question: 'A assinatura é legalmente válida?', answer: 'Sim, assinaturas digitais X.509 com um certificado válido são legalmente reconhecidas na maioria das jurisdições.' },
+      { question: 'Posso adicionar uma assinatura visível?', answer: 'Sim, você pode adicionar uma assinatura visível com texto, imagem, posição e estilo personalizados.' },
+    ],
+  },
+
+  'validate-signature': {
+    title: 'Validar Assinatura',
+    metaDescription: 'Verifique assinaturas digitais em documentos PDF. Verifique a validade do certificado, informações do signatário e integridade do documento.',
+    keywords: ['validar assinatura pdf', 'verificar assinatura digital', 'verificar certificado pdf', 'verificação de assinatura'],
+    description: '<p>A ferramenta Validar Assinatura permite verificar assinaturas digitais em documentos PDF.</p>',
+    howToUse: [
+      { step: 1, title: 'Enviar PDF Assinado', description: 'Envie um documento PDF que contenha assinaturas digitais.' },
+      { step: 2, title: 'Ver Resultados', description: 'Veja todas as assinaturas encontradas no documento com seu status de validade.' },
+      { step: 3, title: 'Exportar Relatório', description: 'Opcionalmente baixe um relatório JSON dos resultados de validação.' },
+    ],
+    useCases: [
+      { title: 'Verificação de Documentos', description: 'Verifique se os documentos assinados são autênticos e não foram alterados.', icon: 'shield-check' },
+      { title: 'Auditoria de Conformidade', description: 'Verifique a validade das assinaturas para fins de conformidade e auditoria.', icon: 'clipboard-check' },
+      { title: 'Revisão de Certificados', description: 'Veja detalhes do certificado e datas de expiração de documentos assinados.', icon: 'award' },
+    ],
+    faq: [
+      { question: 'O que significa "válido"?', answer: 'Uma assinatura válida significa que o documento não foi modificado desde a assinatura e a cadeia de certificados está intacta.' },
+      { question: 'Posso validar múltiplos PDFs?', answer: 'Sim, você pode enviar múltiplos PDFs e validar todas as assinaturas em lote.' },
+      { question: 'Por que uma assinatura pode ser inválida?', answer: 'Assinaturas podem ser inválidas se o documento foi modificado, o certificado expirou ou o certificado não é confiável.' },
+    ],
+  },
 };

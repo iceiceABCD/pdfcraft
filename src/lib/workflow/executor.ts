@@ -11,6 +11,7 @@
 import { WorkflowNode, WorkflowEdge, WorkflowOutputFile } from '@/types/workflow';
 import type { ProcessOutput, ProgressCallback, ProcessInput } from '@/types/pdf';
 import { PDFErrorCode, ErrorCategory } from '@/types/pdf';
+import { logger } from '@/lib/utils/logger';
 
 // Import Processor classes
 import { MergePDFProcessor } from '@/lib/pdf/processors/merge';
@@ -606,7 +607,17 @@ export async function executeNode(
                 if (files.length === 0) throw new Error('No input file');
                 const processor = new CompressPDFProcessor();
                 const quality = String(settings.quality || 'medium') as 'low' | 'medium' | 'high' | 'maximum';
-                return await processor.process(createProcessInput(files, { quality }), onProgress);
+                const algorithm = String(settings.algorithm || 'standard') as 'standard' | 'condense' | 'photon';
+                const optimizeImages = settings.optimizeImages !== undefined ? Boolean(settings.optimizeImages) : false;
+                const removeMetadata = settings.removeMetadata !== undefined ? Boolean(settings.removeMetadata) : false;
+                const photonDpi = Number(settings.photonDpi) || 150;
+                return await processor.process(createProcessInput(files, { 
+                    quality,
+                    algorithm,
+                    optimizeImages,
+                    removeMetadata,
+                    photonDpi,
+                }), onProgress);
             }
 
             case 'flatten-pdf': {
@@ -716,6 +727,72 @@ export async function executeNode(
                     },
                 };
                 return await processor.process(createProcessInput(files, options), onProgress);
+            }
+
+            case 'digital-sign-pdf': {
+                if (files.length === 0) throw new Error('No input file');
+                const certFile = settings.certFile as File | undefined;
+                if (!certFile) {
+                    return {
+                        success: false,
+                        error: {
+                            code: PDFErrorCode.INVALID_OPTIONS,
+                            category: ErrorCategory.VALIDATION_ERROR,
+                            message: 'Certificate file is required. Please configure the node settings.',
+                            recoverable: true,
+                            suggestedAction: 'Click the node to upload a PFX/P12/PEM certificate file.',
+                        },
+                    };
+                }
+                const certPassword = String(settings.certPassword || '');
+                const { parsePfxFile, parseCombinedPem, signPdf } = await import('@/lib/pdf/processors/digital-sign');
+
+                // Parse certificate
+                const isPem = certFile.name.toLowerCase().endsWith('.pem');
+                let certData;
+                try {
+                    if (isPem) {
+                        const content = await certFile.text();
+                        certData = parseCombinedPem(content, certPassword || undefined);
+                    } else {
+                        const bytes = await certFile.arrayBuffer();
+                        certData = parsePfxFile(bytes, certPassword);
+                    }
+                } catch (certErr) {
+                    const msg = certErr instanceof Error ? certErr.message : 'Failed to parse certificate';
+                    return {
+                        success: false,
+                        error: {
+                            code: PDFErrorCode.INVALID_OPTIONS,
+                            category: ErrorCategory.VALIDATION_ERROR,
+                            message: msg.includes('password') ? 'Incorrect certificate password.' : msg,
+                            recoverable: true,
+                            suggestedAction: 'Check the certificate file and password.',
+                        },
+                    };
+                }
+
+                // Sign each PDF file
+                const results: Blob[] = [];
+                const filenames: string[] = [];
+                for (const file of files) {
+                    const pdfBytes = new Uint8Array(await file.arrayBuffer());
+                    onProgress?.(Math.round((results.length / files.length) * 80 + 10));
+                    const signedBytes = await signPdf(pdfBytes, certData, {
+                        signatureInfo: {
+                            reason: String(settings.reason || '') || undefined,
+                            location: String(settings.location || '') || undefined,
+                            contactInfo: String(settings.contactInfo || '') || undefined,
+                        },
+                    });
+                    results.push(new Blob([signedBytes], { type: 'application/pdf' }));
+                    filenames.push(file.name.replace(/\.pdf$/i, '_signed.pdf'));
+                }
+
+                if (results.length === 1) {
+                    return { success: true, result: results[0], filename: filenames[0] };
+                }
+                return { success: true, result: results, filename: filenames[0] };
             }
 
             // ==================== Additional Tools ====================
@@ -884,7 +961,7 @@ export async function executeNode(
 
             // ==================== Passthrough (tools without processors or interactive tools) ====================
             default: {
-                console.warn(`[Workflow Executor] Tool "${toolId}" does not have a workflow processor implementation.`);
+                logger.warn(`[Workflow Executor] Tool "${toolId}" does not have a workflow processor implementation.`);
                 
                 // Return error instead of passing through - safer approach
                 return {
@@ -901,7 +978,7 @@ export async function executeNode(
             }
         }
     } catch (error) {
-        console.error('[Workflow Executor] Error executing node:', error);
+        logger.error('[Workflow Executor] Error executing node:', error);
         
         return {
             success: false,

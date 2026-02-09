@@ -72,6 +72,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
             'add-attachments',   // File selection for attachments required
             'edit-attachments',  // Attachment management interaction required
             'page-dimensions',   // Analysis only, no PDF output
+            'validate-signature', // Read-only signature verification, no PDF output
             'pdf-to-docx',       // Workflow executor not yet implemented
             'pdf-to-pptx',       // Workflow executor not yet implemented
             'pdf-to-excel',      // Workflow executor not yet implemented
@@ -92,7 +93,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
             'convert-to-pdf',
             'convert-from-pdf',
             'optimize-repair',
-            'security-privacy',
+            'secure-pdf',
         ];
 
         const categoryNames: Record<string, string> = {
@@ -101,7 +102,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
             'convert-to-pdf': 'Convert to PDF',
             'convert-from-pdf': 'Convert from PDF',
             'optimize-repair': 'Optimize & Repair',
-            'security-privacy': 'Security & Privacy',
+            'secure-pdf': 'Security & Privacy',
         };
 
         const categoryIcons: Record<string, string> = {
@@ -110,7 +111,7 @@ export function ToolSidebar({ onDragStart, isCollapsed = false, onToggleCollapse
             'convert-to-pdf': 'file-up',
             'convert-from-pdf': 'file-down',
             'optimize-repair': 'zap',
-            'security-privacy': 'shield',
+            'secure-pdf': 'shield',
         };
 
         return categoryOrder

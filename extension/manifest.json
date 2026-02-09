@@ -2,9 +2,9 @@
     "manifest_version": 3,
     "name": "PDFCraft - PDF Tools",
     "version": "1.0.0",
-    "description": "Quick access to 72+ free online PDF tools. Merge, split, compress, convert PDFs - all in your browser.",
+    "description": "Quick access to 90+ free online PDF tools. Merge, split, compress, convert PDFs - all in your browser.",
     "author": "PDFCraft Team",
-    "homepage_url": "https://pdfcraft.gitu.net",
+    "homepage_url": "https://pdfcraft.devtoolcafe.com",
     "icons": {
         "16": "icons/icon16.png",
         "48": "icons/icon48.png",

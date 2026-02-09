@@ -209,7 +209,7 @@ export const ProcessingProgress: React.FC<ProcessingProgressProps> = ({
         {/* Animated shimmer for active states */}
         {(status === 'uploading' || status === 'processing') && clampedProgress < 100 && (
           <div
-            className="absolute left-0 top-0 h-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"
+            className="absolute left-0 top-0 h-full bg-gradient-to-r from-transparent via-[hsl(var(--color-primary-foreground)/0.3)] to-transparent motion-safe:animate-shimmer"
             style={{ width: `${clampedProgress}%` }}
           />
         )}

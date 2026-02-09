@@ -10,6 +10,7 @@ import { Card } from '@/components/ui/Card';
 import { markdownToPDF, type MarkdownPageSize, type MarkdownTheme } from '@/lib/pdf/processors/markdown-to-pdf';
 import { FileType, Upload, Type, Eye, EyeOff } from 'lucide-react';
 import { marked } from 'marked';
+import { sanitizeHtml } from '@/lib/utils/html-sanitizer';
 
 export interface MarkdownToPDFToolProps {
     /** Custom class name */
@@ -302,7 +303,7 @@ Enjoy converting your Markdown to PDF!
                                         prose prose-sm max-w-none
                                         ${theme === 'dark' ? 'bg-gray-900 text-white prose-invert' : 'bg-white'}
                                     `}
-                                    dangerouslySetInnerHTML={{ __html: previewHtml }}
+                                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewHtml) }}
                                 />
                             </div>
                         )}

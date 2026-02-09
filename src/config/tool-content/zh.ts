@@ -2412,6 +2412,60 @@ export const toolContentZh: Record<string, ToolContent> = {
     ],
   },
 
+  'digital-sign-pdf': {
+    title: '数字签名',
+    metaDescription: '为PDF文档添加X.509数字签名。使用PFX、P12或PEM证书签署PDF，具有法律效力。',
+    keywords: ['pdf数字签名', 'x509证书', 'pfx签名', 'p12签名', 'pem签名', '电子签名'],
+    description: `
+      <p>数字签名工具允许您为PDF文档添加加密的X.509数字签名。与简单的手绘签名不同，数字签名提供法律效力和文档完整性验证。</p>
+      <p>上传您的证书文件（PFX、P12或PEM格式），输入密码，即可签署PDF。您可以添加带有自定义文本、图像和位置的可见签名，或仅用于文档完整性的不可见签名。</p>
+      <p>所有签名操作都在浏览器本地进行，您的证书和文档永远不会上传到任何服务器。</p>
+    `,
+    howToUse: [
+      { step: 1, title: '上传PDF', description: '上传需要数字签名的PDF文档。' },
+      { step: 2, title: '加载证书', description: '上传X.509证书文件（.pfx、.p12或.pem）并输入密码。' },
+      { step: 3, title: '配置签名', description: '可选添加签名原因、位置，以及带有自定义文本或图像的可见签名。' },
+      { step: 4, title: '签名并下载', description: '点击签名PDF应用数字签名并下载签名后的文档。' },
+    ],
+    useCases: [
+      { title: '法律文件', description: '使用具有法律约束力的数字签名签署合同、协议和法律文件。', icon: 'scale' },
+      { title: '商业审批', description: '数字签署发票、采购订单和审批文件以建立审计跟踪。', icon: 'briefcase' },
+      { title: '文档完整性', description: '确保文档在签名后未被篡改。', icon: 'shield-check' },
+    ],
+    faq: [
+      { question: '支持哪些证书格式？', answer: '支持PFX（.pfx）、PKCS#12（.p12）和PEM（.pem）证书格式。' },
+      { question: '签名具有法律效力吗？', answer: '是的，使用有效证书的X.509数字签名在大多数司法管辖区具有法律认可。' },
+      { question: '可以添加可见签名吗？', answer: '是的，您可以添加带有自定义文本、图像、位置和样式的可见签名。' },
+    ],
+  },
+
+  'validate-signature': {
+    title: '验证签名',
+    metaDescription: '验证PDF文档中的数字签名。检查证书有效性、签名者信息和文档完整性。',
+    keywords: ['验证pdf签名', '验证数字签名', '检查pdf证书', '签名验证'],
+    description: `
+      <p>验证签名工具允许您验证PDF文档中的数字签名。检查签名是否有效，查看证书信息，并确认文档完整性。</p>
+      <p>上传已签名的PDF，查看所有签名、其有效性状态、签名者信息，以及文档在签名后是否被修改。</p>
+      <p>所有验证都在浏览器本地进行，您的文档永远不会上传到任何服务器。</p>
+    `,
+    howToUse: [
+      { step: 1, title: '上传已签名PDF', description: '上传包含数字签名的PDF文档。' },
+      { step: 2, title: '查看结果', description: '查看文档中找到的所有签名及其有效性状态。' },
+      { step: 3, title: '检查详情', description: '查看证书信息、签名者详情和签名时间戳。' },
+      { step: 4, title: '导出报告', description: '可选下载验证结果的JSON报告。' },
+    ],
+    useCases: [
+      { title: '文档验证', description: '验证签名文档是否真实且未被篡改。', icon: 'shield-check' },
+      { title: '合规审计', description: '检查签名有效性以满足合规和审计要求。', icon: 'clipboard-check' },
+      { title: '证书审查', description: '查看已签名文档的证书详情和到期日期。', icon: 'award' },
+    ],
+    faq: [
+      { question: '"有效"是什么意思？', answer: '有效签名意味着文档自签名以来未被修改，且证书链完整。' },
+      { question: '可以验证多个PDF吗？', answer: '是的，您可以上传多个PDF并批量验证所有签名。' },
+      { question: '为什么签名可能无效？', answer: '如果文档被修改、证书过期或证书不受信任，签名可能无效。' },
+    ],
+  },
+
   'email-to-pdf': {
     title: '邮件转PDF',
     metaDescription: '将邮件文件（.eml、.msg）转换为PDF文档。保留格式、内联图像、可点击链接和嵌入附件。',

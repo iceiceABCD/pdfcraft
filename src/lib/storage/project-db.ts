@@ -63,10 +63,14 @@ function openDatabase(): Promise<IDBDatabase> {
 }
 
 /**
- * Generate a unique project ID
+ * Generate a unique project ID using crypto API
  */
 function generateProjectId(): string {
-  return `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return `project_${crypto.randomUUID()}`;
+  }
+  // Fallback for older browsers
+  return `project_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 }
 
 /**

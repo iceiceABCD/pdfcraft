@@ -75,7 +75,9 @@ export function WorkflowControls({
 
     const handleExecute = useCallback(() => {
         if (selectedFiles.length > 0) {
-            onExecute(selectedFiles);
+            Promise.resolve(onExecute(selectedFiles)).catch((err) => {
+                console.error('[Workflow] Unhandled execution error:', err);
+            });
         }
     }, [selectedFiles, onExecute]);
 

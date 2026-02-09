@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { FileUploader } from '../FileUploader';
 import { ProcessingProgress, ProcessingStatus } from '../ProcessingProgress';
 import { DownloadButton } from '../DownloadButton';
@@ -12,6 +13,8 @@ import type { ProcessOutput } from '@/types/pdf';
 export interface RemoveBlankPagesToolProps { className?: string; }
 
 export function RemoveBlankPagesTool({ className = '' }: RemoveBlankPagesToolProps) {
+  const t = useTranslations('common');
+  const tTools = useTranslations('tools');
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<ProcessingStatus>('idle');
   const [progress, setProgress] = useState(0);
@@ -39,24 +42,24 @@ export function RemoveBlankPagesTool({ className = '' }: RemoveBlankPagesToolPro
 
   return (
     <div className={`space-y-6 ${className}`.trim()}>
-      {!file && <FileUploader accept={['application/pdf', '.pdf']} multiple={false} maxFiles={1} onFilesSelected={(files) => { if (files.length > 0) { setFile(files[0]); setError(null); setResult(null); } }} onError={setError} disabled={isProcessing} label="Upload PDF File" description="Drag and drop a PDF file here." />}
+      {!file && <FileUploader accept={['application/pdf', '.pdf']} multiple={false} maxFiles={1} onFilesSelected={(files) => { if (files.length > 0) { setFile(files[0]); setError(null); setResult(null); } }} onError={setError} disabled={isProcessing} label={tTools('removeBlankPages.uploadLabel') || t('buttons.upload')} description={tTools('removeBlankPages.uploadDescription')} />}
       {error && <div className="p-4 rounded bg-red-50 border border-red-200 text-red-700"><p className="text-sm">{error}</p></div>}
       {file && (
         <>
-          <Card variant="outlined"><div className="flex items-center justify-between"><p className="font-medium">{file.name}</p><Button variant="ghost" size="sm" onClick={() => { setFile(null); setResult(null); }} disabled={isProcessing}>Remove</Button></div></Card>
+          <Card variant="outlined"><div className="flex items-center justify-between"><p className="font-medium">{file.name}</p><Button variant="ghost" size="sm" onClick={() => { setFile(null); setResult(null); }} disabled={isProcessing}>{t('buttons.remove')}</Button></div></Card>
           <Card variant="outlined" size="lg">
-            <h3 className="text-lg font-medium mb-4">Options</h3>
+            <h3 className="text-lg font-medium mb-4">{tTools('removeBlankPages.optionsTitle') || 'Options'}</h3>
             <div>
-              <label className="block text-sm font-medium mb-1">Blank Detection Threshold ({threshold}%)</label>
+              <label className="block text-sm font-medium mb-1">{tTools('removeBlankPages.thresholdLabel', { threshold }) || `Blank Detection Threshold (${threshold}%)`}</label>
               <input type="range" value={threshold} onChange={(e) => setThreshold(parseInt(e.target.value))} min={90} max={100} className="w-full" disabled={isProcessing} />
-              <p className="text-sm text-gray-500 mt-1">Higher values detect only nearly-white pages. Lower values may detect pages with minimal content.</p>
+              <p className="text-sm text-gray-500 mt-1">{tTools('removeBlankPages.thresholdHint') || 'Higher values detect only nearly-white pages.'}</p>
             </div>
           </Card>
         </>
       )}
       {isProcessing && <ProcessingProgress progress={progress} status={status} onCancel={() => { cancelledRef.current = true; setStatus('idle'); }} showPercentage />}
-      {file && <div className="flex flex-wrap items-center gap-4"><Button variant="primary" size="lg" onClick={handleProcess} disabled={!file || isProcessing} loading={isProcessing}>{isProcessing ? 'Processing...' : 'Remove Blank Pages'}</Button>{result && <DownloadButton file={result} filename={file.name.replace('.pdf', '_no_blanks.pdf')} variant="secondary" size="lg" showFileSize />}</div>}
-      {status === 'complete' && result && <div className="p-4 rounded bg-green-50 border border-green-200 text-green-700"><p className="text-sm font-medium">{removedCount > 0 ? `${removedCount} blank page(s) removed!` : 'No blank pages found.'}</p></div>}
+      {file && <div className="flex flex-wrap items-center gap-4"><Button variant="primary" size="lg" onClick={handleProcess} disabled={!file || isProcessing} loading={isProcessing}>{isProcessing ? t('status.processing') : tTools('removeBlankPages.processButton') || 'Remove Blank Pages'}</Button>{result && <DownloadButton file={result} filename={file.name.replace('.pdf', '_no_blanks.pdf')} variant="secondary" size="lg" showFileSize />}</div>}
+      {status === 'complete' && result && <div className="p-4 rounded bg-green-50 border border-green-200 text-green-700"><p className="text-sm font-medium">{removedCount > 0 ? tTools('removeBlankPages.successMessage', { count: removedCount }) || `${removedCount} blank page(s) removed!` : tTools('removeBlankPages.noBlankPages') || 'No blank pages found.'}</p></div>}
     </div>
   );
 }

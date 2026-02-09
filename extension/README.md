@@ -48,7 +48,7 @@ This extension:
 
 ## Links
 
-- Website: [pdfcraft.gitu.net](https://pdfcraft.gitu.net)
+- Website: [pdfcraft.devtoolcafe.com](https://pdfcraft.devtoolcafe.com)
 - GitHub: [github.com/PDFCraftTool/pdfcraft](https://github.com/PDFCraftTool/pdfcraft)
 
 ## License

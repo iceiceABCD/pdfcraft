@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import {
     X,
@@ -57,6 +57,32 @@ export function FileListPanel({ files, onFilesChange, onClose }: FileListPanelPr
     const [previewFile, setPreviewFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [dragIndex, setDragIndex] = useState<number | null>(null);
+    
+    // Track preview URL for cleanup
+    const previewUrlRef = useRef<string | null>(null);
+
+    // Cleanup preview URL on unmount
+    useEffect(() => {
+        return () => {
+            if (previewUrlRef.current) {
+                URL.revokeObjectURL(previewUrlRef.current);
+            }
+        };
+    }, []);
+
+    /**
+     * Handle close with cleanup
+     */
+    const handleClose = useCallback(() => {
+        // Clean up preview URL before closing
+        if (previewUrlRef.current) {
+            URL.revokeObjectURL(previewUrlRef.current);
+            previewUrlRef.current = null;
+        }
+        setPreviewUrl(null);
+        setPreviewFile(null);
+        onClose();
+    }, [onClose]);
 
     /**
      * Remove a file from the list
@@ -98,25 +124,27 @@ export function FileListPanel({ files, onFilesChange, onClose }: FileListPanelPr
      */
     const handlePreview = useCallback((file: File) => {
         // Clean up previous preview URL
-        if (previewUrl) {
-            URL.revokeObjectURL(previewUrl);
+        if (previewUrlRef.current) {
+            URL.revokeObjectURL(previewUrlRef.current);
         }
 
         const url = URL.createObjectURL(file);
+        previewUrlRef.current = url;
         setPreviewUrl(url);
         setPreviewFile(file);
-    }, [previewUrl]);
+    }, []);
 
     /**
      * Close preview
      */
     const closePreview = useCallback(() => {
-        if (previewUrl) {
-            URL.revokeObjectURL(previewUrl);
+        if (previewUrlRef.current) {
+            URL.revokeObjectURL(previewUrlRef.current);
+            previewUrlRef.current = null;
         }
         setPreviewUrl(null);
         setPreviewFile(null);
-    }, [previewUrl]);
+    }, []);
 
     /**
      * Drag and drop handlers
@@ -162,7 +190,7 @@ export function FileListPanel({ files, onFilesChange, onClose }: FileListPanelPr
                             </span>
                         </div>
                         <button
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="p-1 rounded hover:bg-[hsl(var(--color-muted))] transition-colors"
                         >
                             <X className="w-5 h-5 text-[hsl(var(--color-muted-foreground))]" />
@@ -269,7 +297,7 @@ export function FileListPanel({ files, onFilesChange, onClose }: FileListPanelPr
                         <Button
                             variant="primary"
                             size="sm"
-                            onClick={onClose}
+                            onClick={handleClose}
                         >
                             {tWorkflow('confirm') || 'Confirm'}
                         </Button>

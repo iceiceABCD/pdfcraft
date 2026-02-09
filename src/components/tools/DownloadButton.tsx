@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Button, type ButtonProps } from '../ui/Button';
 import { addRecentFile } from '@/lib/storage/recent-files';
 import { useToolContext } from '@/lib/contexts/ToolContext';
+import { sanitizeFilename } from '@/lib/utils/sanitize';
 
 export interface DownloadButtonProps extends Omit<ButtonProps, 'onClick' | 'children'> {
   /** Blob data to download */
@@ -96,10 +97,13 @@ export const DownloadButton: React.FC<DownloadButtonProps> = ({
     setIsDownloading(true);
     onDownloadStart?.();
 
+    // Sanitize filename to prevent path traversal
+    const safeFilename = sanitizeFilename(filename, 'download.pdf');
+
     // Create a temporary anchor element
     const link = document.createElement('a');
     link.href = blobUrl;
-    link.download = filename;
+    link.download = safeFilename;
     link.style.display = 'none';
     
     // Append to body, click, and remove

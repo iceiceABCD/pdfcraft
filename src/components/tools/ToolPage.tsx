@@ -12,6 +12,8 @@ import { getToolIcon } from '@/config/icons';
 import Link from 'next/link';
 import { Home, ChevronRight } from 'lucide-react';
 import { FavoriteButton } from '@/components/ui/FavoriteButton';
+import { useMemo } from 'react';
+import { sanitizeHtml } from '@/lib/utils/html-sanitizer';
 
 export interface ToolPageProps {
   /** Tool data */
@@ -187,6 +189,7 @@ interface DescriptionSectionProps {
 
 function DescriptionSection({ description }: DescriptionSectionProps) {
   const t = useTranslations();
+  const sanitizedDescription = useMemo(() => sanitizeHtml(description), [description]);
   if (!description) return null;
 
   return (
@@ -204,7 +207,7 @@ function DescriptionSection({ description }: DescriptionSectionProps) {
       <Card variant="outlined" size="lg" className="glass-card">
         <div
           className="prose prose-sm max-w-none text-[hsl(var(--color-foreground))/0.8]"
-          dangerouslySetInnerHTML={{ __html: description }}
+          dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
         />
       </Card>
     </section>

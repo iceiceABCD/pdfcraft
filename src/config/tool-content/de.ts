@@ -1696,4 +1696,48 @@ export const toolContentDe: Record<string, ToolContent> = {
       { question: 'Kann ich von PDF/A zurückkonvertieren?', answer: 'PDF/A-Dateien sind Standard-PDFs und können normal geöffnet werden. Die Archivfunktionen fügen Einschränkungen hinzu, keine Limitierungen.' },
     ],
   },
+
+  'digital-sign-pdf': {
+    title: 'Digitale Signatur',
+    metaDescription: 'Fügen Sie X.509 digitale Signaturen zu PDF-Dokumenten hinzu. Signieren Sie PDFs mit PFX-, P12- oder PEM-Zertifikaten für rechtliche Gültigkeit.',
+    keywords: ['digitale signatur pdf', 'x509 zertifikat', 'pfx signatur', 'p12 signatur', 'pem signatur', 'elektronische signatur'],
+    description: '<p>Das Tool für digitale Signaturen ermöglicht es Ihnen, kryptografische X.509 digitale Signaturen zu PDF-Dokumenten hinzuzufügen.</p>',
+    howToUse: [
+      { step: 1, title: 'PDF hochladen', description: 'Laden Sie das PDF-Dokument hoch, das Sie digital signieren möchten.' },
+      { step: 2, title: 'Zertifikat laden', description: 'Laden Sie Ihre X.509-Zertifikatsdatei (.pfx, .p12 oder .pem) hoch und geben Sie das Passwort ein.' },
+      { step: 3, title: 'Signieren und Herunterladen', description: 'Klicken Sie auf PDF signieren, um die digitale Signatur anzuwenden und laden Sie das signierte Dokument herunter.' },
+    ],
+    useCases: [
+      { title: 'Rechtsdokumente', description: 'Signieren Sie Verträge und Rechtsdokumente mit rechtlich bindenden digitalen Signaturen.', icon: 'scale' },
+      { title: 'Geschäftsgenehmigungen', description: 'Signieren Sie Rechnungen und Genehmigungsdokumente digital für Prüfpfade.', icon: 'briefcase' },
+      { title: 'Dokumentenintegrität', description: 'Stellen Sie sicher, dass Dokumente nach der Signierung nicht verändert wurden.', icon: 'shield-check' },
+    ],
+    faq: [
+      { question: 'Welche Zertifikatsformate werden unterstützt?', answer: 'PFX (.pfx), PKCS#12 (.p12) und PEM (.pem) Zertifikatsformate werden unterstützt.' },
+      { question: 'Ist die Signatur rechtlich gültig?', answer: 'Ja, X.509 digitale Signaturen mit einem gültigen Zertifikat sind in den meisten Rechtsordnungen rechtlich anerkannt.' },
+      { question: 'Kann ich eine sichtbare Signatur hinzufügen?', answer: 'Ja, Sie können eine sichtbare Signatur mit benutzerdefiniertem Text, Bild, Position und Stil hinzufügen.' },
+    ],
+  },
+
+  'validate-signature': {
+    title: 'Signatur Validieren',
+    metaDescription: 'Überprüfen Sie digitale Signaturen in PDF-Dokumenten. Prüfen Sie Zertifikatsgültigkeit, Unterzeichnerinformationen und Dokumentenintegrität.',
+    keywords: ['pdf signatur validieren', 'digitale signatur überprüfen', 'pdf zertifikat prüfen', 'signaturverifizierung'],
+    description: '<p>Das Tool Signatur Validieren ermöglicht es Ihnen, digitale Signaturen in PDF-Dokumenten zu überprüfen.</p>',
+    howToUse: [
+      { step: 1, title: 'Signiertes PDF hochladen', description: 'Laden Sie ein PDF-Dokument hoch, das digitale Signaturen enthält.' },
+      { step: 2, title: 'Ergebnisse anzeigen', description: 'Sehen Sie alle im Dokument gefundenen Signaturen mit ihrem Gültigkeitsstatus.' },
+      { step: 3, title: 'Bericht exportieren', description: 'Laden Sie optional einen JSON-Bericht der Validierungsergebnisse herunter.' },
+    ],
+    useCases: [
+      { title: 'Dokumentenverifizierung', description: 'Überprüfen Sie, dass signierte Dokumente authentisch sind und nicht verändert wurden.', icon: 'shield-check' },
+      { title: 'Compliance-Audit', description: 'Prüfen Sie die Signaturgültigkeit für Compliance- und Auditzwecke.', icon: 'clipboard-check' },
+      { title: 'Zertifikatsüberprüfung', description: 'Sehen Sie Zertifikatsdetails und Ablaufdaten von signierten Dokumenten.', icon: 'award' },
+    ],
+    faq: [
+      { question: 'Was bedeutet "gültig"?', answer: 'Eine gültige Signatur bedeutet, dass das Dokument seit der Signierung nicht geändert wurde und die Zertifikatskette intakt ist.' },
+      { question: 'Kann ich mehrere PDFs validieren?', answer: 'Ja, Sie können mehrere PDFs hochladen und alle Signaturen im Stapel validieren.' },
+      { question: 'Warum könnte eine Signatur ungültig sein?', answer: 'Signaturen können ungültig sein, wenn das Dokument geändert wurde, das Zertifikat abgelaufen ist oder das Zertifikat nicht vertrauenswürdig ist.' },
+    ],
+  },
 };
