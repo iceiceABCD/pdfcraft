@@ -37,6 +37,8 @@ export interface GridCombineOptions {
     fillMode: 'leave-empty' | 'repeat' | 'stretch-last';
     /** Page mode: use only first page or all pages from each PDF */
     pageMode: 'first-page-only' | 'all-pages';
+    /** Auto trim visible area using each page's CropBox */
+    autoTrimCropBox: boolean;
 }
 
 /**
@@ -52,6 +54,7 @@ const DEFAULT_OPTIONS: GridCombineOptions = {
     spacing: 10,
     fillMode: 'leave-empty',
     pageMode: 'first-page-only',
+    autoTrimCropBox: true,
 };
 
 /**
@@ -73,6 +76,31 @@ function parseGridLayout(layout: string): [number, number] {
         return [parseInt(match[1], 10), parseInt(match[2], 10)];
     }
     return [2, 2]; // Default
+}
+
+/**
+ * Build embed bounding box from page CropBox.
+ * Falls back to full page box if CropBox is unavailable or invalid.
+ */
+function getEmbeddingBoxFromCropBox(page: any): { left: number; right: number; bottom: number; top: number } | undefined {
+    const crop = page?.getCropBox?.();
+    if (!crop) return undefined;
+
+    const x = Number(crop.x ?? 0);
+    const y = Number(crop.y ?? 0);
+    const width = Number(crop.width ?? 0);
+    const height = Number(crop.height ?? 0);
+
+    if (!Number.isFinite(x) || !Number.isFinite(y) || width <= 0 || height <= 0) {
+        return undefined;
+    }
+
+    return {
+        left: x,
+        right: x + width,
+        bottom: y,
+        top: y + height,
+    };
 }
 
 /**
@@ -211,10 +239,14 @@ export class GridCombineProcessor extends BasePDFProcessor {
                 }
 
                 if (pagesToEmbed.length > 0) {
+                    const embeddingBoxes = combineOptions.autoTrimCropBox
+                        ? pagesToEmbed.map((page) => getEmbeddingBoxFromCropBox(page))
+                        : undefined;
+
                     // Embed pages from this SPECIFIC document instance
                     // This fixes the "Failed to create grid combined PDF" error caused by 
                     // trying to embed pages from different documents in a single call
-                    const embedded = await newPdf.embedPages(pagesToEmbed);
+                    const embedded = await newPdf.embedPages(pagesToEmbed, embeddingBoxes as any);
 
                     // Store mapping and populate sourcePages
                     for (let i = 0; i < pagesToEmbed.length; i++) {
@@ -340,6 +372,7 @@ export class GridCombineProcessor extends BasePDFProcessor {
                 outputPageCount: totalOutputPages,
                 pageMode: combineOptions.pageMode,
                 fillMode: combineOptions.fillMode,
+                autoTrimCropBox: combineOptions.autoTrimCropBox,
             });
 
         } catch (error) {
